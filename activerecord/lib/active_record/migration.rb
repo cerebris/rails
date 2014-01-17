@@ -32,7 +32,11 @@ module ActiveRecord
 
   class PendingMigrationError < ActiveRecordError#:nodoc:
     def initialize
-      super("Migrations are pending; run 'bin/rake db:migrate RAILS_ENV=#{Rails.env}' to resolve this issue.")
+      if defined?(Rails)
+        super("Migrations are pending; run 'bin/rake db:migrate RAILS_ENV=#{::Rails.env}' to resolve this issue.")
+      else
+        super("Migrations are pending; run 'bin/rake db:migrate' to resolve this issue.")
+      end
     end
   end
 
@@ -629,7 +633,7 @@ module ActiveRecord
     def copy(destination, sources, options = {})
       copied = []
 
-      FileUtils.mkdir_p(destination) unless File.exists?(destination)
+      FileUtils.mkdir_p(destination) unless File.exist?(destination)
 
       destination_migrations = ActiveRecord::Migrator.migrations(destination)
       last = destination_migrations.last
@@ -716,7 +720,7 @@ module ActiveRecord
 
       def load_migration
         require(File.expand_path(filename))
-        name.constantize.new
+        name.constantize.new(name, version)
       end
 
   end
@@ -875,7 +879,7 @@ module ActiveRecord
 
       validate(@migrations)
 
-      ActiveRecord::SchemaMigration.create_table
+      Base.connection.initialize_schema_migrations_table
     end
 
     def current_version

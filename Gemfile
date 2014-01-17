@@ -7,7 +7,7 @@ gem 'rack-cache', '~> 1.2'
 gem 'bcrypt-ruby', '~> 3.1.2'
 gem 'jquery-rails', '~> 2.2.0'
 gem 'turbolinks'
-gem 'arel', github: 'rails/arel'
+gem 'arel', github: 'rails/arel', branch: '4-0-stable'
 
 # This needs to be with require false to avoid
 # it being automatically loaded by sprockets
@@ -25,7 +25,7 @@ gem 'dalli', '>= 2.2.1'
 
 # Add your own local bundler stuff
 local_gemfile = File.dirname(__FILE__) + "/.Gemfile"
-instance_eval File.read local_gemfile if File.exists? local_gemfile
+instance_eval File.read local_gemfile if File.exist? local_gemfile
 
 group :test do
   platforms :mri_19 do

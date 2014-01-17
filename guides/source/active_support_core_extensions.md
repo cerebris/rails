@@ -886,7 +886,7 @@ class User < ActiveRecord::Base
 end
 ```
 
-With that configuration you get a user's name via his profile, `user.profile.name`, but it could be handy to still be able to access such attribute directly:
+With that configuration you get a user's name via their profile, `user.profile.name`, but it could be handy to still be able to access such attribute directly:
 
 ```ruby
 class User < ActiveRecord::Base
@@ -2255,8 +2255,6 @@ The defaults for these options can be localized, their keys are:
 | `:two_words_connector` | `support.array.two_words_connector` |
 | `:words_connector`     | `support.array.words_connector`     |
 | `:last_word_connector` | `support.array.last_word_connector` |
-
-Options `:connector` and `:skip_last_comma` are deprecated.
 
 NOTE: Defined in `active_support/core_ext/array/conversions.rb`.
 

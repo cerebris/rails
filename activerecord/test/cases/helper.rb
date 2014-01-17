@@ -20,6 +20,9 @@ Thread.abort_on_exception = true
 # Show backtraces for deprecated behavior for quicker cleanup.
 ActiveSupport::Deprecation.debug = true
 
+# Disable available locale checks to avoid warnings running the test suite.
+I18n.enforce_available_locales = false
+
 # Connect to the database
 ARTest.connect
 
@@ -102,7 +105,7 @@ def load_schema
 
   load SCHEMA_ROOT + "/schema.rb"
 
-  if File.exists?(adapter_specific_schema_file)
+  if File.exist?(adapter_specific_schema_file)
     load adapter_specific_schema_file
   end
 ensure

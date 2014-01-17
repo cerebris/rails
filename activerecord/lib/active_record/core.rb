@@ -112,7 +112,7 @@ module ActiveRecord
         elsif abstract_class?
           "#{super}(abstract)"
         elsif !connected?
-          "#{super}(no database connection)"
+          "#{super} (call '#{super}.connection' to establish a connection)"
         elsif table_exists?
           attr_list = columns.map { |c| "#{c.name}: #{c.type}" } * ', '
           "#{super}(#{attr_list})"
@@ -129,7 +129,7 @@ module ActiveRecord
       # Returns an instance of <tt>Arel::Table</tt> loaded with the current table name.
       #
       #   class Post < ActiveRecord::Base
-      #     scope :published_and_commented, published.and(self.arel_table[:comments_count].gt(0))
+      #     scope :published_and_commented, -> { published.and(self.arel_table[:comments_count].gt(0)) }
       #   end
       def arel_table
         @arel_table ||= Arel::Table.new(table_name, arel_engine)
@@ -371,6 +371,17 @@ module ActiveRecord
 
     def has_transactional_callbacks? # :nodoc:
       !_rollback_callbacks.empty? || !_commit_callbacks.empty? || !_create_callbacks.empty?
+    end
+
+    # Required to deserialize Syck properly.
+    if YAML.const_defined?(:ENGINE) && YAML::ENGINE.syck?
+      ActiveSupport::Deprecation.warn(
+        "Syck is deprecated and support for serialization has been removed." \
+        " ActiveRecord::Core#yaml_initialize will be removed in 4.1 which will break deserialization support with Syck."
+      )
+      def yaml_initialize(tag, coder) # :nodoc:
+        init_with(coder)
+      end
     end
 
     private

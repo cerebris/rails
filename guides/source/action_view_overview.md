@@ -262,7 +262,7 @@ Rails determines the name of the partial to use by looking at the model name in 
 You can also specify a second partial to be rendered between instances of the main partial by using the `:spacer_template` option:
 
 ```erb
-<%= render @products, spacer_template: "product_ruler" %>
+<%= render partial: @products, spacer_template: "product_ruler" %>
 ```
 
 Rails will render the `_product_ruler` partial (with no data passed to it) between each pair of `_product` partials.
@@ -1259,7 +1259,7 @@ Creates a field set for grouping HTML form elements.
 Creates a file upload field.
 
 ```html+erb
-<%= form_tag {action: "post"}, {multipart: true} do %>
+<%= form_tag({action:"post"}, multipart: true) do %>
   <label for="file">File to Upload</label> <%= file_field_tag "file" %>
   <%= submit_tag %>
 <% end %>

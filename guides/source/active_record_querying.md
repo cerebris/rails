@@ -436,7 +436,7 @@ to this code:
 Client.where("orders_count = #{params[:orders]}")
 ```
 
-because of argument safety. Putting the variable directly into the conditions string will pass the variable to the database **as-is**. This means that it will be an unescaped variable directly from a user who may have malicious intent. If you do this, you put your entire database at risk because once a user finds out he or she can exploit your database they can do just about anything to it. Never ever put your arguments directly inside the conditions string.
+because of argument safety. Putting the variable directly into the conditions string will pass the variable to the database **as-is**. This means that it will be an unescaped variable directly from a user who may have malicious intent. If you do this, you put your entire database at risk because once a user finds out they can exploit your database they can do just about anything to it. Never ever put your arguments directly inside the conditions string.
 
 TIP: For more information on the dangers of SQL injection, see the [Ruby on Rails Security Guide](security.html#sql-injection).
 
@@ -826,6 +826,8 @@ client.save
 
 As `client` is explicitly set to be a readonly object, the above code will raise an `ActiveRecord::ReadOnlyRecord` exception when calling `client.save` with an updated value of _visits_.
 
+NOTE: using `joins` without an explicit `select` will return readonly records.
+
 Locking Records for Update
 --------------------------
 
@@ -928,6 +930,8 @@ This will result in the following SQL:
 ```sql
 SELECT clients.* FROM clients LEFT OUTER JOIN addresses ON addresses.client_id = clients.id
 ```
+
+NOTE: using `joins` might return readonly records. See [readonly](active_record_querying.html#readonly-objects) for more details.
 
 ### Using Array/Hash of Named Associations
 
@@ -1293,7 +1297,7 @@ especially useful if a `default_scope` is specified in the model and should not 
 applied for this particular query.
 
 ```ruby
-Client.unscoped.all
+Client.unscoped.load
 ```
 
 This method removes all scoping and will do a normal query on the table.
@@ -1310,11 +1314,6 @@ Client.unscoped {
 Dynamic Finders
 ---------------
 
-NOTE: Dynamic finders have been deprecated in Rails 4.0 and will be
-removed in Rails 4.1. The best practice is to use Active Record scopes
-instead. You can find the deprecation gem at
-https://github.com/rails/activerecord-deprecated_finders
-
 For every field (also known as an attribute) you define in your table, Active Record provides a finder method. If you have a field called `first_name` on your `Client` model for example, you get `find_by_first_name` for free from Active Record. If you have a `locked` field on the `Client` model, you also get `find_by_locked` and methods.
 
 You can specify an exclamation point (`!`) on the end of the dynamic finders to get them to raise an `ActiveRecord::RecordNotFound` error if they do not return any records, like `Client.find_by_name!("Ryan")`
@@ -1323,6 +1322,11 @@ If you want to find both by name and locked, you can chain these finders togethe
 
 Find or Build a New Object
 --------------------------
+
+NOTE: Some dynamic finders have been deprecated in Rails 4.0 and will be
+removed in Rails 4.1. The best practice is to use Active Record scopes
+instead. You can find the deprecation gem at
+https://github.com/rails/activerecord-deprecated_finders
 
 It's common that you need to find a record or create it if it doesn't exist. You can do that with the `find_or_create_by` and `find_or_create_by!` methods.
 

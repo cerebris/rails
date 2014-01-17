@@ -46,7 +46,7 @@ module ActiveRecord
     # PostgreSQL-specific extensions to column definitions in a table.
     class PostgreSQLColumn < Column #:nodoc:
       attr_accessor :array
-      # Instantiates a new PostgreSQL column definition in a table.
+
       def initialize(name, default, oid_type, sql_type = nil, null = true)
         @oid_type = oid_type
         default_value     = self.class.extract_value_from_default(default)
@@ -60,6 +60,14 @@ module ActiveRecord
         end
 
         @default_function = default if has_default_function?(default_value, default)
+      end
+
+      def number?
+        !array && super
+      end
+
+      def text?
+        !array && super
       end
 
       # :stopdoc:
@@ -706,6 +714,10 @@ module ActiveRecord
         !native_database_types[type].nil?
       end
 
+      def update_table_definition(table_name, base) #:nodoc:
+        Table.new(table_name, base)
+      end
+
       protected
 
         # Returns the version of the connected PostgreSQL server.
@@ -768,7 +780,7 @@ module ActiveRecord
           end
         end
 
-        FEATURE_NOT_SUPPORTED = "0A000" # :nodoc:
+        FEATURE_NOT_SUPPORTED = "0A000" #:nodoc:
 
         def exec_no_cache(sql, binds)
           @connection.async_exec(sql)
@@ -946,10 +958,6 @@ module ActiveRecord
 
         def create_table_definition(name, temporary, options)
           TableDefinition.new native_database_types, name, temporary, options
-        end
-
-        def update_table_definition(table_name, base)
-          Table.new(table_name, base)
         end
     end
   end

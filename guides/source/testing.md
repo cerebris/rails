@@ -175,7 +175,7 @@ class PostTest < ActiveSupport::TestCase
 
 The `PostTest` class defines a _test case_ because it inherits from `ActiveSupport::TestCase`. `PostTest` thus has all the methods available from `ActiveSupport::TestCase`. You'll see those methods a little later in this guide.
 
-Any method defined within a class inherited from `MiniTest::Unit::TestCase` 
+Any method defined within a class inherited from `MiniTest::Unit::TestCase`
 (which is the superclass of `ActiveSupport::TestCase`) that begins with `test` (case sensitive) is simply called a test. So, `test_password`, `test_valid_password` and `testValidPassword` all are legal test names and are run automatically when the test case is run.
 
 Rails adds a `test` method that takes a test name and a block. It generates a normal `MiniTest::Unit` test with method names prefixed with `test_`. So,
@@ -773,7 +773,7 @@ class UserFlowsTest < ActionDispatch::IntegrationTest
       u = users(user)
       sess.https!
       sess.post "/login", username: u.username, password: u.password
-      assert_equal '/welcome', path
+      assert_equal '/welcome', sess.path
       sess.https!(false)
     end
   end
@@ -783,18 +783,23 @@ end
 Rake Tasks for Running your Tests
 ---------------------------------
 
-You don't need to set up and run your tests by hand on a test-by-test basis. Rails comes with a number of commands to help in testing. The table below lists all commands that come along in the default Rakefile when you initiate a Rails project.
+You don't need to set up and run your tests by hand on a test-by-test basis.
+Rails comes with a number of commands to help in testing.
+The table below lists all commands that come along in the default Rakefile
+when you initiate a Rails project.
 
-| Tasks                    | Description |
-| ------------------------ | ----------- |
-| `rake test`             | Runs all unit, functional and integration tests. You can also simply run `rake test` as Rails will run all the tests by default|
-| `rake test:controllers` | Runs all the controller tests from `test/controllers`|
-| `rake test:functionals` | Runs all the functional tests from `test/controllers`, `test/mailers`, and `test/functional`|
-| `rake test:helpers`     | Runs all the helper tests from `test/helpers`|
-| `rake test:integration` | Runs all the integration tests from `test/integration`|
-| `rake test:mailers`     | Runs all the mailer tests from `test/mailers`|
-| `rake test:models`      | Runs all the model tests from `test/models`|
-| `rake test:units`       | Runs all the unit tests from `test/models`, `test/helpers`, and `test/unit`|
+| Tasks                   | Description |
+| ----------------------- | ----------- |
+| `rake test`             | Runs all unit, functional and integration tests. You can also simply run `rake` as Rails will run all the tests by default |
+| `rake test:controllers` | Runs all the controller tests from `test/controllers` |
+| `rake test:functionals` | Runs all the functional tests from `test/controllers`, `test/mailers`, and `test/functional` |
+| `rake test:helpers`     | Runs all the helper tests from `test/helpers` |
+| `rake test:integration` | Runs all the integration tests from `test/integration` |
+| `rake test:mailers`     | Runs all the mailer tests from `test/mailers` |
+| `rake test:models`      | Runs all the model tests from `test/models` |
+| `rake test:units`       | Runs all the unit tests from `test/models`, `test/helpers`, and `test/unit` |
+| `rake test:all`         | Runs all tests quickly by merging all types and not resetting db |
+| `rake test:all:db`      | Runs all tests quickly by merging all types and resetting db |
 
 There're also some test commands which you can initiate by running rake tasks:
 

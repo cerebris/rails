@@ -1,3 +1,31 @@
+*   Re-enable support for iterating over `DateTIme` ranges
+
+    Fixes #13667.
+
+    *Prathamesh Sonpatki*
+
+*   Use `remove_possible_method` instead of `remove_method` to avoid
+    a `NameError` to be thrown on FreeBSD with the `Date` object.
+
+    *Rafael Mendonça França*, *Robin Dupret*
+
+*   Default the new `I18n.enforce_available_locales` config to `true`, meaning
+    `I18n` will make sure that all locales passed to it must be declared in the
+    `available_locales` list.
+
+    To disable it add the following configuration to your application:
+
+        config.i18n.enforce_available_locales = false
+
+    This also ensures I18n configuration is properly initialized taking the new
+    option into account, to avoid their deprecations while booting up the app.
+
+    *Carlos Antonio da Silva*, *Yves Senn*
+
+*   Fix file descriptor being leaked on each call to `Kernel.silence_stream`.
+
+    *Mario Visic*
+
 *   Fix `slice!` deleting the default value of the hash.
 
     *Antonio Santos*

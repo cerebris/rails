@@ -5,7 +5,7 @@ module ActiveRecord::Associations::Builder
     end
 
     def valid_options
-      super + [:foreign_type, :polymorphic, :touch]
+      super + [:foreign_type, :polymorphic, :touch, :counter_cache]
     end
 
     def constructable?
@@ -73,7 +73,13 @@ module ActiveRecord::Associations::Builder
           old_foreign_id    = changed_attributes[foreign_key_field]
 
           if old_foreign_id
-            klass      = association(#{name.inspect}).klass
+            association = association(:#{name})
+            reflection = association.reflection
+            if reflection.polymorphic?
+              klass = send("#{reflection.foreign_type}_was").constantize
+            else
+              klass = association.klass
+            end
             old_record = klass.find_by(klass.primary_key => old_foreign_id)
 
             if old_record
@@ -82,7 +88,7 @@ module ActiveRecord::Associations::Builder
           end
 
           record = #{name}
-          unless record.nil? || record.new_record?
+          if record && record.persisted?
             record.touch #{options[:touch].inspect if options[:touch] != true}
           end
         end

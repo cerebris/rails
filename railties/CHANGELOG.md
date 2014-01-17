@@ -1,3 +1,23 @@
+*   Only lookup `config.log_level` for stdlib `::Logger` instances.
+    Assign it as is for third party loggers like `Log4r::Logger`.
+
+    Fixes #13421.
+
+    *Yves Senn*
+
+*   Add `ENV['DATABASE_URL']` support in `rails dbconsole`. Fixes #13320.
+
+    *Huiming Teo*
+
+*   Fix default `config/application.rb` template to honor the RAILS_GROUPS env variable.
+
+    *Guillermo Iguaran*
+
+*   Fix default `config/application.rb` template to remove unused `config.assets.enabled` variable.
+
+    *Guillermo Iguaran*
+
+
 ## Rails 4.0.1 (November 01, 2013) ##
 
 *   Fix the event name of action_dispatch requests.

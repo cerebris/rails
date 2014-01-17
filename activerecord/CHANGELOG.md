@@ -1,5 +1,208 @@
+*   Add back `#yaml_initialize` method for Syck deserialization
+
+    `ActiveRecord::Core#yaml_initialize` has been added back to support deserialization using
+    the Syck engine. This is to facilitate migration from Syck to Psych. Serialization support
+    will not been restored for Syck, Psych should be used to serialize YAML once its been
+    parsed with Syck.
+
+    *Blake Mesdag*, *arthurnn*
+
+*   Make `touch` fire the `after_commit` and `after_rollback` callbacks.
+
+    *Harry Brundage*
+
+*   Don't try to get the subclass if the inheritance column doesn't exist
+
+    The `subclass_from_attrs` method is called even if the column specified by
+    the `inheritance_column` setting doesn't exist. This prevents setting associations
+    via the attributes hash if the association name clashes with the value of the setting,
+    typically `:type`. This worked previously in Rails 3.2.
+
+    *Ujjwal Thaakar*
+
+*   Fix bug in `becomes!` when changing from the base model to a STI sub-class.
+
+    Fixes #13272.
+
+    *the-web-dev*, *Yves Senn*
+
+*   Initialize version on Migration objects so that it can be used in a migration,
+    and it will be included in the announce message.
+
+    *Dylan Thacker-Smith*
+
+*   `change_table` now uses the current adapter's `update_table_definition`
+    method to retrieve a specific table definition.
+    This ensures that `change_table` and `create_table` will use
+    similar objects.
+
+    Fixes #13577 and #13503.
+
+    *Nishant Modak*, *Prathamesh Sonpatki*, *Rafael Mendonça França*
+
+*   Fixed ActiveRecord::Store nil conversion TypeError when using YAML coder.
+    In case the YAML passed as paramter is nil, uses an empty string.
+
+    Fixes #13570.
+
+    *Thales Oliveira*
+
+*   Fix presence validator for association when the associated record responds to `to_a`.
+
+    *gmarik*
+
+*   Fix bug in `belongs_to` association with `touch: true`.
+    Associated records are no longer touched, when they are already destroyed.
+
+    Fixes #13445.
+
+    Example:
+
+        # Given Comment has belongs_to :post, touch: true
+        comment.post.destroy
+        comment.destroy # no longer touches post
+
+    *Paul Nikitochkin*
+
+*   Fixed `update_column`, `update_columns`, and `update_all` to correctly serialize
+    values for `array`, `hstore` and `json` column types in PostgreSQL.
+
+    Fixes #12261.
+
+    *Tadas Tamosauskas*, *Carlos Antonio da Silva*
+
+*   Do not consider PostgreSQL array columns as number or text columns.
+
+    The code uses these checks in several places to know what to do with a
+    particular column, for instance AR attribute query methods has a branch
+    like this:
+
+        if column.number?
+          !value.zero?
+        end
+
+    This should never be true for array columns, since it would be the same
+    as running [].zero?, which results in a NoMethodError exception.
+
+    Fixing this by ensuring that array columns in PostgreSQL never return
+    true for number?/text? checks.
+
+    *Carlos Antonio da Silva*
+
+*   Fix a bug when assigning an array containing string numbers to a
+    PostgreSQL integer array column.
+
+    Fixes #13444.
+
+    Example:
+
+        # Given Book#ratings is of type :integer, array: true
+        Book.new(ratings: [1, 2]) # worked before
+        Book.new(ratings: ['1', '2']) # now works as well
+
+    *Damien Mathieu*
+
+*   `db:test:clone` and `db:test:prepare` must load Rails environment.
+
+    `db:test:clone` and `db:test:prepare` use `ActiveRecord::Base`. configurations,
+    so we need to load the Rails environment, otherwise the config wont be in place.
+
+    *arthurnn*
+
+*   Use the right column to type cast grouped calculations with custom expressions.
+
+    Fixes #13230.
+
+    Example:
+
+            # Before
+            Account.group(:firm_name).sum('0.01 * credit_limit')
+            # => { '37signals' => '0.5' }
+
+            # After
+            Account.group(:firm_name).sum('0.01 * credit_limit')
+            # => { '37signals' => 0.5 }
+
+    *Paul Nikitochkin*
+
+*   Support deprecated finder options when performing calculations
+    on an association.
+
+    Fixes #13165.
+
+    *Garth Smedley*, *Yves Senn*
+
+*   `ActiveRecord::ConnectionAdapters.string_to_time` respects
+    string with timezone (e.g. Wed, 04 Sep 2013 20:30:00 JST).
+
+    Fixes: #12278, #12459
+
+    *kennyj*, *George Guimarães*
+
+*   Polymorphic `belongs_to` associations with the `touch: true` option set update the timestamps of
+    the old and new owner correctly when moved between owners of different types.
+
+    Example:
+
+        class Rating < ActiveRecord::Base
+          belongs_to :rateable, polymorphic: true, touch: true
+        end
+
+        rating = Rating.create rateable: Song.find(1)
+        rating.update_attributes rateable: Book.find(2) # => timestamps of Song(1) and Book(2) are updated
+
+    *Severin Schoepke*
+
+*   `type_to_sql` returns a `String` for unmapped columns. This fixes an error
+    when using unmapped array types in combination with PostgreSQL's `array: true`.
+
+    Fixes #13146.
+
+    Example:
+
+        change_colum :table, :column, :bigint, array: true
+
+    *Jens Fahnenbruck*, *Yves Senn*
+
+*   Previously, the `has_one` macro incorrectly accepts the `counter_cache`
+    option due to a bug, although that options was never supported nor
+    functional on `has_one` and `has_one ... through` relationships. It now
+    correctly raises an `ArgumentError` when passed that option.
+
+    *Godfrey Chan*
+
+*   Update counter cache on a has_many relationship regardless of default scope
+
+    Fix #12952.
+
+    *Uku Taht*
+
+*   Fix bug when validating the uniqueness of an aliased attribute.
+
+    Fixes #12402.
+
+    *Lauro Caetano*
+
+*   Checks to see if the record contains the foreign key to set the inverse automatically.
+
+    *Edo Balvers*
+
+*   Prevent the counter cache from being decremented twice when destroying
+    a record on a has_many :through association.
+
+    Fixes #11079.
+
+    *Dmitry Dedov*
+
+*   Fix bug where has_one associaton record update result in crash, when replaced with itself.
+
+    Fixes #12834.
+
+    *Denis Redozubov*, *Sergio Cambra*
+
 *   Fix uninitialized constant TransactionState error when Marshall.load is used on an Active Record result.
-    Fixes #12790
+
+    Fixes #12790.
 
     *Jason Ayre*
 
@@ -23,7 +226,7 @@
         vendor.users.to_a # => No exception is raised
 
 
-    Fixes: #12242, #9517, #10240
+    Fixes #12242, #9517, #10240.
 
     *Paul Nikitochkin*
 

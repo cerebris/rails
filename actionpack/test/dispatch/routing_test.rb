@@ -2851,6 +2851,24 @@ class TestRoutingMapper < ActionDispatch::IntegrationTest
     assert !@request.params[:action].frozen?
   end
 
+  def test_multiple_positional_args_with_the_same_name
+    draw do
+      get '/downloads/:id/:id.tar' => 'downloads#show', as: :download, format: false
+    end
+
+    expected_params = {
+      controller: 'downloads',
+      action:     'show',
+      id:         '1'
+    }
+
+    get '/downloads/1/1.tar'
+    assert_equal 'downloads#show', @response.body
+    assert_equal expected_params, @request.symbolized_path_parameters
+    assert_equal '/downloads/1/1.tar', download_path('1')
+    assert_equal '/downloads/1/1.tar', download_path('1', '1')
+  end
+
 private
 
   def draw(&block)
@@ -3671,5 +3689,30 @@ class TestRedirectRouteGeneration < ActionDispatch::IntegrationTest
     assert_raise(ActionController::UrlGenerationError) do
       assert_equal '/de/account?controller=products', url_for(controller: 'products', action: 'index', :locale => 'de', only_path: true)
     end
+  end
+end
+
+class TestUrlGenerationErrors < ActionDispatch::IntegrationTest
+  Routes = ActionDispatch::Routing::RouteSet.new.tap do |app|
+    app.draw do
+      get "/products/:id" => 'products#show', :as => :product
+    end
+  end
+
+  def app; Routes end
+
+  include Routes.url_helpers
+
+  test "url helpers raise a helpful error message whem generation fails" do
+    url, missing = { action: 'show', controller: 'products', id: nil }, [:id]
+    message = "No route matches #{url.inspect} missing required keys: #{missing.inspect}"
+
+    # Optimized url helper
+    error = assert_raises(ActionController::UrlGenerationError){ product_path(nil) }
+    assert_equal message, error.message
+
+    # Non-optimized url helper
+    error = assert_raises(ActionController::UrlGenerationError, message){ product_path(id: nil) }
+    assert_equal message, error.message
   end
 end

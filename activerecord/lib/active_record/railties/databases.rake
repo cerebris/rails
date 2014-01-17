@@ -249,7 +249,7 @@ db_namespace = namespace :db do
     desc 'Load a schema.rb file into the database'
     task :load => [:environment, :load_config] do
       file = ENV['SCHEMA'] || File.join(ActiveRecord::Tasks::DatabaseTasks.db_dir, 'schema.rb')
-      if File.exists?(file)
+      if File.exist?(file)
         load(file)
       else
         abort %{#{file} doesn't exist yet. Run `rake db:migrate` to create it, then try again. If you do not intend to use a database, you should instead alter #{Rails.root}/config/application.rb to limit the frameworks that will be loaded.}
@@ -274,7 +274,7 @@ db_namespace = namespace :db do
       desc 'Clear a db/schema_cache.dump file.'
       task :clear => [:environment, :load_config] do
         filename = File.join(ActiveRecord::Tasks::DatabaseTasks.db_dir, "schema_cache.dump")
-        FileUtils.rm(filename) if File.exists?(filename)
+        FileUtils.rm(filename) if File.exist?(filename)
       end
     end
 
@@ -344,7 +344,7 @@ db_namespace = namespace :db do
     end
 
     # desc "Recreate the test database from a fresh schema"
-    task :clone do
+    task :clone => :environment do
       case ActiveRecord::Base.schema_format
         when :ruby
           db_namespace["test:clone_schema"].invoke
@@ -365,7 +365,7 @@ db_namespace = namespace :db do
     end
 
     # desc 'Check for pending migrations and load the test schema'
-    task :prepare => :load_config do
+    task :prepare => [:environment, :load_config] do
       unless ActiveRecord::Base.configurations.blank?
         db_namespace['test:load'].invoke
       end
@@ -402,4 +402,3 @@ namespace :railties do
 end
 
 task 'test:prepare' => ['db:test:prepare', 'db:test:load', 'db:abort_if_pending_migrations']
-

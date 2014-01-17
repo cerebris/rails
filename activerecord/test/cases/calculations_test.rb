@@ -9,6 +9,7 @@ require 'models/topic'
 require 'models/minivan'
 require 'models/speedometer'
 require 'models/ship_part'
+require 'models/reply'
 
 Company.has_many :accounts
 
@@ -195,6 +196,10 @@ class CalculationsTest < ActiveRecord::TestCase
   def test_sum_should_return_valid_values_for_decimals
     NumericData.create(:bank_balance => 19.83)
     assert_equal 19.83, NumericData.sum(:bank_balance)
+  end
+
+  def test_should_return_type_casted_values_with_group_and_expression
+    assert_equal 0.5, Account.group(:firm_name).sum('0.01 * credit_limit')['37signals']
   end
 
   def test_should_group_by_summed_field_with_conditions
@@ -569,5 +574,16 @@ class CalculationsTest < ActiveRecord::TestCase
     taks_relation = Topic.select(:approved, :id).order(:id)
     assert_equal [1,2,3,4], taks_relation.pluck(:id)
     assert_equal [false, true, true, true], taks_relation.pluck(:approved)
+  end
+
+  def test_deprecated_finder_options_on_association_calculation
+    topic = topics(:second)
+    topic.replies.create! title: "lol"
+    topic.replies.create! title: "rofl"
+    assert_equal 2, topic.replies.count
+
+    assert_deprecated do
+      assert_equal 1, topic.replies.count(conditions: { title: "lol" })
+    end
   end
 end

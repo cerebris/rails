@@ -21,6 +21,11 @@ class TextHelperTest < ActionView::TestCase
     assert simple_format("<b> test with html tags </b>").html_safe?
   end
 
+  def test_simple_format_included_in_isolation
+    helper_klass = Class.new { include ActionView::Helpers::TextHelper }
+    assert helper_klass.new.simple_format("<b> test with html tags </b>").html_safe?
+  end
+
   def test_simple_format
     assert_equal "<p></p>", simple_format(nil)
 
@@ -40,6 +45,11 @@ class TextHelperTest < ActionView::TestCase
 
   def test_simple_format_should_sanitize_input_when_sanitize_option_is_not_false
     assert_equal "<p><b> test with unsafe string </b></p>", simple_format("<b> test with unsafe string </b><script>code!</script>")
+  end
+
+  def test_simple_format_should_sanitize_input_when_sanitize_option_is_true
+    assert_equal '<p><b> test with unsafe string </b></p>',
+      simple_format('<b> test with unsafe string </b><script>code!</script>', {}, sanitize: true)
   end
 
   def test_simple_format_should_not_sanitize_input_when_sanitize_option_is_false
